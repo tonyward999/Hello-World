@@ -8,111 +8,155 @@ function dataExtractionFromeLearningLog() {
   var year2017Data = dataSpreadsheet.getSheetByName('2017');
   var year2018Data = dataSpreadsheet.getSheetByName('2018');
   var year2019Data = dataSpreadsheet.getSheetByName('2019');
+  var extractionData = dataSpreadsheet.getSheetByName('Extraction Data');
+  var extractedData = dataSpreadsheet.getSheetByName('Extracted Data');
   var htmlSheet = dataSpreadsheet.getSheetByName('HTML');
   //Explore the 2018 sheet
-  //Read a url
+  //Read data extraction information
+  var range = extractionData.getDataRange();
+  var dataValues = range.getValues();
+  var sitePageName = dataValues[0][0];
+  //var q1 = dataValues[0][2];
+  //var q2 = dataValues[1][2];
+  //var q3 = dataValues[2][2];
+  //var q4 = dataValues[3][2];
+  //var q5 = dataValues[4][2];
+  //var q6 = dataValues[5][2];
+  //var q7 = dataValues[6][2];
+  //var q8 = dataValues[7][2];
+  //var ssq1 = dataValues[0][1];
+  //var ssq2 = dataValues[1][1];
+  //var ssq3 = dataValues[2][1];
+  //var ssq4 = dataValues[3][1];
+  //var ssq5 = dataValues[4][1];
+  //var ssq6 = dataValues[5][1];
+  //var ssq7 = dataValues[6][1];
+  //var ssq8 = dataValues[7][1];
+  var length = dataValues.length; //The number of questions on the page
+
+  //Write data to Extracted data sheet
+  extractedData.getRange(1,1).setValue("Student");
+  for (var i = 0; i < dataValues.length; i++){
+    extractedData.getRange(1,i+2).setValue(dataValues[i][2]);
+  }
+
+  //This is the start of the loop through all the student logs, first read the student name, then form the site url
   var row = 2;
-  var column = 5;
-  var logUrl = year2018Data.getRange(row,column).getValue();
+  var column = 1;
+  var studentID = year2018Data.getRange(row,column).getValue();
+  var logUrl = "https://sites.google.com/a/york.ac.uk/" + studentID + sitePageName;
+  //var logUrl1 = year2018Data.getRange(row,column).getValue();
   //Open site
   //Open a page by its url
   //I can construct the url of each page using the username which can be found from cell row, column = 1 of 2018 sheet
   //then just add /term-1/after-induction to the end
   //https://sites.google.com/a/york.ac.uk/xw1648/term-1/after-induction
-  var sitePage = SitesApp.getPageByUrl("https://sites.google.com/a/york.ac.uk/xw1648/term-1/after-induction");
+  var sitePage = SitesApp.getPageByUrl(logUrl);
   //getHtmlContent() as string
   var pageHTML = sitePage.getHtmlContent();
   //parse this text
   //find first statement "Do you think it will be what you expected?"
-  var location = pageHTML.search("Do you think");
+  var location = pageHTML.search(dataValues[0][1]);
   //var question1 = "Do you think it will be what you expected?";
   //var question1length = question1.length;
   var textPart1 = pageHTML.substring(location);
   //In textPart1 I have from Do you think onwards
   var location = textPart1.search("<");
-  var question1 = textPart1.substring(0,location);
-  textPart1 = textPart1.substring(question1.length);
+  //var question1 = dataValues[0][2];
+  textPart1 = textPart1.substring(dataValues[0][2].length);
   location = textPart1.search("span");
   textPart1 = textPart1.substring(location+5);
   location = textPart1.search("</td>");
   var answer1 = cleanString(textPart1.substring(0,location));
   textPart1 = textPart1.substring(answer1.length);
   //Next question is: Is the teaching style what you expected?  Do you have any specific observations about the teaching style compared to what you have experienced in the past?
-  var question2 = "Is the teaching style what you expected?  Do you have any specific observations about the teaching style compared to what you have experienced in the past?";
-  location = textPart1.search("Is the teaching style what you expected?");
-  textPart1 = textPart1.substring(location + question2.length);
+  //var question2 = "Is the teaching style what you expected?  Do you have any specific observations about the teaching style compared to what you have experienced in the past?";
+  location = textPart1.search(dataValues[1][1]);
+  textPart1 = textPart1.substring(location + dataValues[1][2].length);
   location = textPart1.search("<i>");
   textPart1 = textPart1.substring(location+3);
   location = textPart1.search("</td>");
   var answer2 = cleanString(textPart1.substring(0,location));
   //answer2 is very messy at the moment because of the embedded html tags, these need to be removed
    //Next find "Is the level of interaction what you expected?""
-  var question3 = "Is the level of interaction what you expected?";
-  location = textPart1.search("Is the level of interaction what you");
-  textPart1 = textPart1.substring(location + question3.length);
+  //var question3 = "Is the level of interaction what you expected?";
+  location = textPart1.search(dataValues[2][1]);
+  textPart1 = textPart1.substring(location + dataValues[2][2].length);
   location = textPart1.search("<i>");
   textPart1 = textPart1.substring(location+3);
   location = textPart1.search("</td>");
   //textPart1 = textPart1.substring(location);
   var answer3 = cleanString(textPart1.substring(0,location));
   //Find "Are you pleasantly surprised about the programme or do you have concerns about the year ahead."
-  var question4 = "Are you pleasantly surprised about the programme or do you have concerns about the year ahead."
-  location = textPart1.search("Are you pleasantly surprised about the programme");
-  textPart1 = textPart1.substring(location + question4.length);
+  //var question4 = "Are you pleasantly surprised about the programme or do you have concerns about the year ahead."
+  location = textPart1.search(dataValues[3][1]);
+  textPart1 = textPart1.substring(location + dataValues[3][2].length);
   location = textPart1.search("<i>");
   textPart1 = textPart1.substring(location+3);
   location = textPart1.search("</td>");
   var answer4 = cleanString(textPart1.substring(0,location));
   textPart1 = textPart1.substring(location);
-  var question5 = "Was there anything about the induction programme that surprised you?  Were you happy with the induction programme?  Has the induction programme changed your thinking about the programme or about your own learning in any way, if so describe."
-  location = textPart1.search("Was there anything about the induction programme");
-  textPart1 = textPart1.substring(location + question5.length);
+  //var question5 = "Was there anything about the induction programme that surprised you?  Were you happy with the induction programme?  Has the induction programme changed your thinking about the programme or about your own learning in any way, if so describe."
+  location = textPart1.search(dataValues[4][1]);
+  textPart1 = textPart1.substring(location + dataValues[4][2].length);
   location = textPart1.search("<i>");
   textPart1 = textPart1.substring(location+3);
   location = textPart1.search("</td>");
   var answer5 = cleanString(textPart1.substring(0,location));
   textPart1 = textPart1.substring(location);
-  var question6 = "Now that the induction programme is over, please reflect on how you think the afternoon sessions have helped you. Comment on the activities that you found most helpful, on activities that might be changed, and on activities that might be added."
-  location = textPart1.search("Now that the induction programme is over");
-  textPart1 = textPart1.substring(location + question6.length);
+  //var question6 = "Now that the induction programme is over, please reflect on how you think the afternoon sessions have helped you. Comment on the activities that you found most helpful, on activities that might be changed, and on activities that might be added."
+  location = textPart1.search(dataValues[5][1]);
+  textPart1 = textPart1.substring(location + dataValues[5][2].length);
   location = textPart1.search("<i>");
   textPart1 = textPart1.substring(location+3);
   location = textPart1.search("</td>");
   var answer6 = cleanString(textPart1.substring(0,location));
   textPart1 = textPart1.substring(location);
-  var question7 = "Based on what you did during the induction session and any socializing in the evenings, what can you say about the other students in your supervision group? What are their strengths and weaknesses? How can they help you to achieve your study goals for the programme?  How can you help them achieve their goals? What factors do you feel are essential for successful collaborative learning? ";
-  location = textPart1.search("Based on what you did during the induction session");
-  textPart1 = textPart1.substring(location + question7.length);
+  //var question7 = "Based on what you did during the induction session and any socializing in the evenings, what can you say about the other students in your supervision group? What are their strengths and weaknesses? How can they help you to achieve your study goals for the programme?  How can you help them achieve their goals? What factors do you feel are essential for successful collaborative learning?";
+  location = textPart1.search(dataValues[6][1]);
+  textPart1 = textPart1.substring(location + dataValues[6][2].length);
   location = textPart1.search("<i>");
   textPart1 = textPart1.substring(location+3);
   location = textPart1.search("</td>");
   var answer7 = cleanString(textPart1.substring(0,location));
   textPart1 = textPart1.substring(location);
-  var question8 = "If you have not already done so, share your Jung Typology Test, Learning styles and Team Role preference questionnaire summaries with your group.  What implications do you think any similarities or differences will have to how you will be able to work as a group?";
-  location = textPart1.search("If you have not already done so");
-  textPart1 = textPart1.substring(location + question8.length);
+  //var question8 = "If you have not already done so, share your Jung Typology Test, Learning styles and Team Role preference questionnaire summaries with your group.  What implications do you think any similarities or differences will have to how you will be able to work as a group?";
+  location = textPart1.search(dataValues[7][1]);
+  textPart1 = textPart1.substring(location + dataValues[7][2].length);
   location = textPart1.search("<i>");
   textPart1 = textPart1.substring(location+3);
   location = textPart1.search("</td>");
   var answer8 = cleanString(textPart1.substring(0,location));
   textPart1 = textPart1.substring(location);
 
-  htmlSheet.getRange(1,1).setValue(question1);
-  htmlSheet.getRange(1,2).setValue(answer1);
-  htmlSheet.getRange(2,1).setValue(question2);
-  htmlSheet.getRange(2,2).setValue(answer2);
-  htmlSheet.getRange(3,1).setValue(question3);
-  htmlSheet.getRange(3,2).setValue(answer3);
-  htmlSheet.getRange(4,1).setValue(question4);
-  htmlSheet.getRange(4,2).setValue(answer4);
-  htmlSheet.getRange(5,1).setValue(question5);
-  htmlSheet.getRange(5,2).setValue(answer5);
-  htmlSheet.getRange(6,1).setValue(question6);
-  htmlSheet.getRange(6,2).setValue(answer6);
-  htmlSheet.getRange(7,1).setValue(question7);
-  htmlSheet.getRange(7,2).setValue(answer7);
-  htmlSheet.getRange(8,1).setValue(question8);
-  htmlSheet.getRange(8,2).setValue(answer8);
+  //Write data to Extracted data sheet
+  extractedData.getRange(row,1).setValue(studentID);
+  extractedData.getRange(row,2).setValue(answer1);
+  extractedData.getRange(row,3).setValue(answer2);
+  extractedData.getRange(row,4).setValue(answer3);
+  extractedData.getRange(row,5).setValue(answer4);
+  extractedData.getRange(row,6).setValue(answer5);
+  extractedData.getRange(row,7).setValue(answer6);
+  extractedData.getRange(row,8).setValue(answer7);
+  extractedData.getRange(row,9).setValue(answer8);
+
+  //Write data to Extracted data sheet
+  //htmlSheet.getRange(1,1).setValue(dataValues[0][2]);
+  //htmlSheet.getRange(1,2).setValue(answer1);
+  //htmlSheet.getRange(2,1).setValue(dataValues[1][2]);
+  //htmlSheet.getRange(2,2).setValue(answer2);
+  //htmlSheet.getRange(3,1).setValue(dataValues[2][2]);
+  //htmlSheet.getRange(3,2).setValue(answer3);
+  //htmlSheet.getRange(4,1).setValue(dataValues[3][2]);
+  //htmlSheet.getRange(4,2).setValue(answer4);
+  //htmlSheet.getRange(5,1).setValue(dataValues[4][2]);
+  //htmlSheet.getRange(5,2).setValue(answer5);
+  //htmlSheet.getRange(6,1).setValue(dataValues[5][2]);
+  //htmlSheet.getRange(6,2).setValue(answer6);
+  //htmlSheet.getRange(7,1).setValue(dataValues[6][2]);
+  //htmlSheet.getRange(7,2).setValue(answer7);
+  //htmlSheet.getRange(8,1).setValue(dataValues[7][2]);
+  //htmlSheet.getRange(8,2).setValue(answer8);
 
 }
 function cleanString(dirtyString){
